@@ -3,9 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <title>Perros y Gatos</title>
+    <title>Plagas</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 
@@ -38,10 +36,7 @@
 
       <div class="bg-dark text-secondary mt-5 px-4 py-2 text-center">
         <div class="py-5">
-          <h1 class="display-5 fw-bold text-white">Ringa Tech</h1>
-          <div class="col-lg-6 mx-auto">
-            <p class="fs-5 mb-4">Revisa <a href="https://youtube.com/RingaTech">mi canal</a> para videos de inteligencia artificial, programaci&oacute;n, etc.</p>
-          </div>
+          <h1 class="display-5 fw-bold text-white">Electronica</h1>
         </div>
       </div>
 
@@ -64,11 +59,11 @@
 
     var modelo = null;
 
-    // (async() => {
-    //   console.log("Cargando modelo...");
-    //   modelo = await tf.loadLayersModel("model.json");
-    //   console.log("Modelo cargado");
-    // })();
+    (async() => {
+      console.log("Cargando modelo...");
+      modelo = await tf.loadLayersModel("model.json");
+      console.log("Modelo cargado");
+    })();
 
     window.onload = function() {
       mostrarCamara();
@@ -132,48 +127,52 @@
       setTimeout(procesarCamara, 20);
     }
 
-    // function predecir() {
-    //   if (modelo != null) {
-    //     resample_single(canvas, 100, 100, otrocanvas);
+    function predecir() {
+      if (modelo != null) {
+        resample_single(canvas, 100, 100, otrocanvas);
 
-    //     //Hacer la predicción
-    //     var ctx2 = otrocanvas.getContext("2d");
-    //     var imgData = ctx2.getImageData(0,0, 100, 100);
+        //Hacer la predicción
+        var ctx2 = otrocanvas.getContext("2d");
+        var imgData = ctx2.getImageData(0,0, 50, 50);
 
-    //     var arr = [];
-    //     var arr100 = [];
+        var arr = [];
+        var arr50 = [];
 
-    //     for (var p=0; p < imgData.data.length; p+= 4) {
-    //       var rojo = imgData.data[p] / 255;
-    //       var verde = imgData.data[p+1] / 255;
-    //       var azul = imgData.data[p+2] / 255;
+        for (var p=0; p < imgData.data.length; p+= 4) {
+          var rojo = imgData.data[p] / 255;
+          var verde = imgData.data[p+1] / 255;
+          var azul = imgData.data[p+2] / 255;
 
-    //       var gris = (rojo+verde+azul)/3;
 
-    //       arr100.push([gris]);
-    //       if (arr100.length == 100) {
-    //         arr.push(arr100);
-    //         arr100 = [];
-    //       }
-    //     }
+          arr50.push([rojo, verde, azul]); // Incluye los tres canales en un solo paso
+            if (arr50.length == 50) {
+                arr.push(arr50);
+                arr50 = [];
+            }
+        }
 
-    //     arr = [arr];
+        arr = [arr];
 
-    //     var tensor = tf.tensor4d(arr);
-    //     var resultado = modelo.predict(tensor).dataSync();
+        var tensor = tf.tensor4d(arr);
+        var resultado = modelo.predict(tensor).dataSync();
 
-    //     var respuesta;
-    //     if (resultado <= .5) {
-    //       respuesta = "Gato";
-    //     } else {
-    //       respuesta = "Perro";
-    //     }
-    //     document.getElementById("resultado").innerHTML = respuesta;
+        
+        // Encontrar el índice del valor máximo en la salida
+        var indiceMaximo = resultado.indexOf(Math.max(...resultado));
 
-    //   }
+        // Array de etiquetas
+        var etiquetas = ['Apple___Apple_scab', 'Apple___Black_rot', 'Apple___Cedar_apple_rust', 'Apple___healthy', 'Blueberry___healthy', 'Cherry___healthy', 'Cherry___Powdery_mildew', 'Corn___Cercospora_leaf_spot Gray_leaf_spot', 'Corn___Common_rust', 'Corn___healthy', 'Corn___Northern_Leaf_Blight', 'Grape___Black_rot', 'Grape___Esca_(Black_Measles)', 'Grape___healthy', 'Grape___Leaf_blight_(Isariopsis_Leaf_Spot)', 'Orange___Haunglongbing_(Citrus_greening)', 'Peach___Bacterial_spot', 'Peach___healthy', 'Pepper,_bell___Bacterial_spot', 'Pepper,_bell___healthy', 'Potato___Early_blight', 'Potato___healthy', 'Potato___Late_blight', 'Raspberry___healthy', 'Soybean___healthy', 'Squash___Powdery_mildew', 'Strawberry___healthy', 'Strawberry___Leaf_scorch', 'Tomato___Bacterial_spot', 'Tomato___Early_blight', 'Tomato___healthy', 'Tomato___Late_blight', 'Tomato___Leaf_Mold', 'Tomato___Septoria_leaf_spot', 'Tomato___Spider_mites Two-spotted_spider_mite', 'Tomato___Target_Spot', 'Tomato___Tomato_mosaic_virus', 'Tomato___Tomato_Yellow_Leaf_Curl_Virus'];
 
-    //   setTimeout(predecir, 150);
-    // }
+        // Mostrar la etiqueta correspondiente
+        var etiquetaPrediccion = etiquetas[indiceMaximo];
+        console.log(etiquetaPrediccion);
+        document.getElementById("resultado").innerHTML = etiquetaPrediccion;
+
+
+      }
+
+      setTimeout(predecir, 150);
+    }
 
     /**
        * Hermite resize - fast image resize/resample using Hermite filter. 1 cpu version!
